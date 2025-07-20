@@ -8,6 +8,57 @@
 <body class="bg-light">
     <div class="container py-5">
         <h1 class="mb-4">SOSFIC <span class="text-primary">Host</span> Dashboard</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Peer ID (host)</h6>
+                        <div class="h5">{{ peer_id }}</div>
+                        <h6 class="card-title mt-3">Stockage utilisé</h6>
+                        <div class="h5">{{ storage_gb }} Go</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Peers connectés</h6>
+                        <div class="h5">{{ num_peers }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Fragments partagés</h6>
+                        <ul class="list-group">
+                            {% for frag in fragments %}
+                            <li class="list-group-item">{{ frag }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Importer un fichier à fragmenter</h5>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="input-group mb-2">
+                        <input type="file" class="form-control" name="file" required>
+                        <button class="btn btn-primary" type="submit">Importer & Fragmenter</button>
+                    </div>
+                </form>
+                <small class="text-muted">Les fichiers volumineux (&gt;10Go) sont fragmentés automatiquement.</small>
+            </div>
+        </div>
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">URL à partager pour rejoindre le réseau :</h5>
@@ -16,15 +67,6 @@
                     <button class="btn btn-outline-secondary" onclick="copyJoinUrl()">Copier</button>
                 </div>
                 <small class="text-muted">Donne cette URL à tes amis pour qu'ils rejoignent ton réseau SOSFIC.</small>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Statistiques réseau (à venir)</h5>
-                <ul>
-                    <li>Peers connectés : <span class="text-secondary">(à implémenter)</span></li>
-                    <li>Fragments partagés : <span class="text-secondary">(à implémenter)</span></li>
-                </ul>
             </div>
         </div>
     </div>
