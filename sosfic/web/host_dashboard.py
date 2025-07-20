@@ -49,6 +49,13 @@ def index():
         fragments=fragments
     )
 
+@app.route('/delete_fragments', methods=['POST'])
+def delete_fragments():
+    for frag in Path(UPLOAD_FOLDER).glob('*.bin'):
+        frag.unlink()
+    flash('Tous les fragments ont été supprimés.', 'success')
+    return ('', 204)
+
 def fragment_streaming(file_storage, original_filename):
     """Fragmenter le fichier uploadé à la volée, sans jamais le stocker en entier."""
     i = 0

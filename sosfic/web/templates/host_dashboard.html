@@ -2,12 +2,34 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SOSFIC Host Dashboard</title>
+    <title>SOSFIC Host Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .admin-header {
+            background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+            color: #fff;
+            border-radius: 0.5rem;
+            padding: 2rem 1rem 1rem 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            min-height: 140px;
+        }
+        .upload-btn {
+            font-size: 1.2rem;
+            padding: 0.75rem 2rem;
+        }
+    </style>
 </head>
 <body class="bg-light">
-    <div class="container py-5">
-        <h1 class="mb-4">SOSFIC <span class="text-primary">Host</span> Dashboard</h1>
+    <div class="container py-4">
+        <div class="admin-header mb-4">
+            <h1 class="mb-1">SOSFIC <span class="fw-bold">Host</span> <span class="fs-5">Admin Panel</span></h1>
+            <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
+                <div><strong>Peer ID :</strong> <span class="badge bg-light text-dark">{{ peer_id }}</span></div>
+                <div><strong>URL de partage :</strong> <span class="badge bg-light text-dark">{{ join_url }}</span></div>
+            </div>
+        </div>
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -15,66 +37,91 @@
             {% endfor %}
         {% endif %}
         {% endwith %}
-        <div class="row mb-4">
+        <div class="row g-4 mb-4">
             <div class="col-md-4">
-                <div class="card">
+                <div class="card stat-card shadow-sm">
                     <div class="card-body">
-                        <h6 class="card-title">Peer ID (host)</h6>
-                        <div class="h5">{{ peer_id }}</div>
-                        <h6 class="card-title mt-3">Stockage utilisé</h6>
-                        <div class="h5">{{ storage_gb }} Go</div>
+                        <h6 class="card-title">Stockage utilisé</h6>
+                        <div class="display-6">{{ storage_gb }} <span class="fs-5">Go</span></div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card">
+                <div class="card stat-card shadow-sm">
                     <div class="card-body">
                         <h6 class="card-title">Peers connectés</h6>
-                        <div class="h5">{{ num_peers }}</div>
+                        <div class="display-6">{{ num_peers }}</div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card">
+                <div class="card stat-card shadow-sm">
                     <div class="card-body">
                         <h6 class="card-title">Fragments partagés</h6>
-                        <ul class="list-group">
+                        <div class="display-6">{{ fragments|length }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Importer et fragmenter un fichier volumineux</h5>
+                <form method="post" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center">
+                    <input type="file" class="form-control w-auto" name="file" required>
+                    <button class="btn btn-primary upload-btn" type="submit">
+                        <i class="bi bi-upload me-2"></i>Importer & Fragmenter
+                    </button>
+                </form>
+                <small class="text-muted">Les fichiers &gt;10Go sont fragmentés à la volée, sans stockage complet.</small>
+            </div>
+        </div>
+        <div class="row g-4 mb-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Liste des fragments</h5>
+                        <ul class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
                             {% for frag in fragments %}
-                            <li class="list-group-item">{{ frag }}</li>
+                            <li class="list-group-item small">{{ frag }}</li>
                             {% endfor %}
+                            {% if fragments|length == 0 %}
+                            <li class="list-group-item text-muted">Aucun fragment pour l’instant.</li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Importer un fichier à fragmenter</h5>
-                <form method="post" enctype="multipart/form-data">
-                    <div class="input-group mb-2">
-                        <input type="file" class="form-control" name="file" required>
-                        <button class="btn btn-primary" type="submit">Importer & Fragmenter</button>
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Actions administrateur</h5>
+                        <button class="btn btn-danger w-100 mb-2" onclick="confirmDeleteFragments()">
+                            <i class="bi bi-trash"></i> Supprimer tous les fragments
+                        </button>
+                        <button class="btn btn-outline-secondary w-100" onclick="copyJoinUrl()">
+                            <i class="bi bi-clipboard"></i> Copier l’URL de partage
+                        </button>
                     </div>
-                </form>
-                <small class="text-muted">Les fichiers volumineux (&gt;10Go) sont fragmentés automatiquement.</small>
-            </div>
-        </div>
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">URL à partager pour rejoindre le réseau :</h5>
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" value="{{ join_url }}" id="join-url" readonly>
-                    <button class="btn btn-outline-secondary" onclick="copyJoinUrl()">Copier</button>
                 </div>
-                <small class="text-muted">Donne cette URL à tes amis pour qu'ils rejoignent ton réseau SOSFIC.</small>
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.js"></script>
     <script>
         function copyJoinUrl() {
-            const input = document.getElementById('join-url');
-            input.select();
+            const temp = document.createElement('input');
+            temp.value = '{{ join_url }}';
+            document.body.appendChild(temp);
+            temp.select();
             document.execCommand('copy');
+            document.body.removeChild(temp);
+            alert('URL copiée !');
+        }
+        function confirmDeleteFragments() {
+            if (confirm('Supprimer tous les fragments ?')) {
+                fetch('/delete_fragments', {method: 'POST'})
+                    .then(() => window.location.reload());
+            }
         }
     </script>
 </body>
