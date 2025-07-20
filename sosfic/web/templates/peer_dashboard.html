@@ -11,7 +11,7 @@
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Rejoindre un réseau SOSFIC</h5>
-                <form method="get" action="/">
+                <form method="post" action="/">
                     <div class="input-group mb-2">
                         <input type="url" class="form-control" name="host_url" id="host-url" placeholder="URL du host (ex: https://monhost.github.dev)" value="{{ host_url }}" required>
                         <button class="btn btn-primary" type="submit">Rejoindre</button>
@@ -20,12 +20,26 @@
                 <small class="text-muted">Colle ici l'URL fournie par l'host pour rejoindre le réseau.</small>
             </div>
         </div>
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Infos sur ce peer</h5>
                 <ul>
-                    <li>Host rejoint : <span class="text-secondary">{{ host_url or '(non connecté)' }}</span></li>
-                    <li>Fragments détenus : <span class="text-secondary">(à implémenter)</span></li>
+                    <li><strong>Host rejoint :</strong> {{ host_url or '(non connecté)' }}</li>
+                    <li><strong>Mon ID :</strong> {{ peer_id }}</li>
+                    <li><strong>Status host :</strong> {{ host_status.status if host_status else '(non connecté)' }}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Fragments à récupérer</h5>
+                <ul class="list-group">
+                    {% for frag in fragments %}
+                    <li class="list-group-item small">{{ frag }}</li>
+                    {% endfor %}
+                    {% if fragments|length == 0 %}
+                    <li class="list-group-item text-muted">Aucun fragment à récupérer.</li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
